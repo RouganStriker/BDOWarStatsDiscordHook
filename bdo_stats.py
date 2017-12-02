@@ -62,7 +62,7 @@ class BDOStats(object):
                     'emoji': ':man_with_gua_pi_mao:',
                 }),
                 ('Deaths', {
-                    'stats': [('max', 'Most'), ('min', 'Least')],
+                    'stats': [('max', 'Most'), ('min', 'Least'), ('mean', 'Average')],
                     'verb': '',
                     'emoji': ':skull_crossbones:',
                 }),
@@ -115,7 +115,7 @@ class BDOStats(object):
                 else:
                     raise Exception("Unknown stat {0}".format(stat))
 
-                if value == 0:
+                if value == 0 or stat == 'mean':
                     players = ''
                 else:
                     # List the player names
