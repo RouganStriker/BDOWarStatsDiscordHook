@@ -169,7 +169,7 @@ class BDOStats(object):
 
     def _find_players(self, df, condition):
         # Return a string of all players that satisfy the condition
-        return ", ".join(sort(df.iloc[np.where(condition)[0]].index.tolist()))
+        return ", ".join(sorted(df.iloc[np.where(condition)[0]].index.tolist()))
 
     def generate_stats(self, nodeName, outcome, date):
         df = pd.DataFrame(self.stats, columns=['Player'] + self.column_data.keys()[:11])
