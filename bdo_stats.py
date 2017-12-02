@@ -107,9 +107,9 @@ class BDOStats(object):
 
             for stat, adjective in data['stats']:
                 if stat == 'max':
-                    value = df[col].max()
+                    value = round(df[col].max(), 2)
                 elif stat == 'min':
-                    value = df[col].min()
+                    value = round(df[col].min(), 2)
                 elif stat == 'mean':
                     value = round(df[col].mean(), 2)
                 else:
@@ -121,17 +121,17 @@ class BDOStats(object):
                     # List the player names
                     players = " ({})".format(", ".join(df.iloc[np.where(df[col] == value)[0]].index.tolist()))
 
-                    field_values.append(
-                        '{adjective}{verb}: {value}{players}'.format(adjective=adjective,
-                                                                     verb=data['verb'],
-                                                                     value=value,
-                                                                     players=players)
-                    )
+                field_values.append(
+                    '{adjective}{verb}: {value}{players}'.format(adjective=adjective,
+                                                                 verb=data['verb'],
+                                                                 value=value,
+                                                                 players=players)
+                )
 
             results['superlatives'].append({
                 'name': '{emoji} {col}{verb}'.format(emoji=data['emoji'],
-                                                      col=col,
-                                                      verb=data['verb']),
+                                                     col=col,
+                                                     verb=data['verb']),
                 'value': '\n'.join(field_values),
             })
 
