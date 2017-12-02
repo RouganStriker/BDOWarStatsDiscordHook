@@ -2,6 +2,7 @@ from collections import OrderedDict
 import csv
 import numpy as np
 import pandas as pd
+import requests
 
 
 class BDOStats(object):
@@ -97,7 +98,7 @@ class BDOStats(object):
 
         results = {
             'averages': [], # We display the averages in the summary panel
-            'superlatives': {}
+            'superlatives': []
         }
 
         for col, data in self.column_data.items():
@@ -135,14 +136,34 @@ class BDOStats(object):
                                                                      players=players)
                     )
 
-            results['superlatives'][col] = {
+            results['superlatives'].append({
                 'name': '{emoji} {col}{verb}'.format(emoji=data['emoji'],
                                                       col=col,
                                                       verb=data['verb']),
                 'value': '\n'.join(field_values),
-            }
+            })
 
-        print(results)
+        data = {
+            "content": "@everyone",
+            "embeds": [
+                {
+                    "title": "Node War Summary",
+                    "fields": [
+                        {
+                            "name": "Attendance Count",
+                            "value": len(self.stats)
+                        }
+                    ]
+                },
+                {
+                    "title": "Node War Stats",
+                    "fields": [
+                        results['superlatives']
+                    ]
+                }
+            ]
+        }
+        requests.post('https://discordapp.com/api/webhooks/386422713813565440/wUDlTkdTbYiSOFBDtXhFdA6St91NH0DxEfCsrxthzBwJB_4JAe9XDwH6Ip0qKP2dt8Tn', data)
 
             #
             # if col in ['Fortress', 'Command Post', 'Gate', 'Placed Objects']:
