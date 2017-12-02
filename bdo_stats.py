@@ -1,19 +1,19 @@
 from collections import OrderedDict
 import csv
-import json
 import numpy as np
 import pandas as pd
 import requests
 
 
 class BDOStats(object):
-    def __init__(self, csv_file):
+    def __init__(self, csv_file, webhook=None):
         with open(csv_file) as f:
             rows = csv.reader(f)
             header = rows.next()
             if len(header) < 11:
                 raise Exception("Expected at least 12 columns, got {0}".format(len(header)))
 
+            self.webhook = webhook
             self.stats = [[row[0]] + map(int, row[1:12]) for row in rows]
             self.column_data = OrderedDict([
                 ('Fortress', {
@@ -77,7 +77,7 @@ class BDOStats(object):
                     'emoji': ':knife:',
                 }),
                 ('KDR', {
-                    'stats': [('max', 'Most'), ('min', 'Least'), ('mean', 'Average')],
+                    'stats': [('max', 'Highest'), ('min', 'Lowest'), ('mean', 'Average')],
                     'verb': '',
                     'emoji': ':crossed_swords:',
                 }),
@@ -95,10 +95,10 @@ class BDOStats(object):
         df['Total'] = df['Guild Master'] + df['Officer'] + df['Member'] + df['Siege Weapons']
         df['KDR'] = df['Total'].divide(df['Deaths'])
         df['KDR'].replace([np.inf, -np.inf], np.nan, inplace=True)
+        df['KDR'] = df['KDR'].apply(lambda x: pd.Series.round(x, 2))
         df.set_index('Player', inplace=True)
 
         results = {
-            'averages': [], # We display the averages in the summary panel
             'superlatives': []
         }
 
@@ -111,7 +111,7 @@ class BDOStats(object):
                 elif stat == 'min':
                     value = df[col].min()
                 elif stat == 'mean':
-                    value = df[col].mean()
+                    value = round(df[col].mean(), 2)
                 else:
                     raise Exception("Unknown stat {0}".format(stat))
 
@@ -121,15 +121,6 @@ class BDOStats(object):
                     # List the player names
                     players = " ({})".format(", ".join(df.iloc[np.where(df[col] == value)[0]].index.tolist()))
 
-                if stat == 'mean':
-                    results['averages'].append(
-                        '{emoji} Average {col}{verb}: {value}{players}'.format(emoji=data['emoji'],
-                                                                               col=col,
-                                                                               verb=data['verb'],
-                                                                               value=value,
-                                                                               players=players)
-                    )
-                else:
                     field_values.append(
                         '{adjective}{verb}: {value}{players}'.format(adjective=adjective,
                                                                      verb=data['verb'],
@@ -162,4 +153,10 @@ class BDOStats(object):
                 }
             ]
         }
-        requests.post('https://discordapp.com/api/webhooks/386422713813565440/wUDlTkdTbYiSOFBDtXhFdA6St91NH0DxEfCsrxthzBwJB_4JAe9XDwH6Ip0qKP2dt8Tn', data=data)
+
+        if self.webhook:
+            r = requests.post(self.webhook, data=data)
+            print(r.content)
+        else:
+            print("No Webhook, results:")
+            print(results)
