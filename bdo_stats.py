@@ -1,5 +1,6 @@
 from collections import OrderedDict
 import csv
+import json
 import numpy as np
 import pandas as pd
 import requests
@@ -77,7 +78,7 @@ class BDOStats(object):
                 }),
                 ('KDR', {
                     'stats': [('max', 'Most'), ('min', 'Least'), ('mean', 'Average')],
-                    'verb': ' Kills',
+                    'verb': '',
                     'emoji': ':crossed_swords:',
                 }),
             ])
@@ -157,44 +158,8 @@ class BDOStats(object):
                 },
                 {
                     "title": "Node War Stats",
-                    "fields": [
-                        results['superlatives']
-                    ]
+                    "fields": results['superlatives']
                 }
             ]
         }
-        requests.post('https://discordapp.com/api/webhooks/386422713813565440/wUDlTkdTbYiSOFBDtXhFdA6St91NH0DxEfCsrxthzBwJB_4JAe9XDwH6Ip0qKP2dt8Tn', data)
-
-            #
-            # if col in ['Fortress', 'Command Post', 'Gate', 'Placed Objects']:
-            #     # We only care about the max and ignore 0
-            #     highest = df[col].max()
-            #     if highest == 0:
-            #         result = 0
-            #     else:
-            #         result = "{0} ({1})".format(highest, ", ".join(get_players(col, highest)))
-            #     print("Most {0} Destroyed: {1}".format(col, result))
-            # else:
-            #     highest = df[col].max()
-            #     lowest = df[col].min()
-            #     avg = df[col].mean()
-            #
-            #     if col in ["Deaths", "Help", 'KDR']:
-            #         descriptor = ""
-            #     else:
-            #         descriptor = "Kills"
-            #
-            #     if highest == 0:
-            #         print("Most {0} {1}: 0".format(col, descriptor))
-            #     else:
-            #         print("Most {0} {1}: {2} ({3})".format(col, descriptor, highest,
-            #                                                ", ".join(get_players(col, highest))))
-            #     if lowest == 0:
-            #         result = 0
-            #     else:
-            #         result = "{1} ({2})".format(lowest, ", ".join(get_players(col, lowest)))
-            #     print("Least {0} {1}: {2}".format(col, descriptor, lowest, result))
-            #
-            #     print("Average {0} {1}: {2}".format(col, descriptor, avg))
-
-
+        requests.post('https://discordapp.com/api/webhooks/386422713813565440/wUDlTkdTbYiSOFBDtXhFdA6St91NH0DxEfCsrxthzBwJB_4JAe9XDwH6Ip0qKP2dt8Tn', data=data)
