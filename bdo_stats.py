@@ -83,14 +83,13 @@ class BDOStats(object):
                 }),
             ])
 
-    def get_summary(self, node_name, result):
-        return {
-            "node": node_name,
-            "result": result,
-            "attendanceCount": len(self.stats)
-        }
+            self.outcome_mapping = {
+                'win': ':trophy: Victory :trophy:',
+                'loss': ':broken_heart: Defeat :broken_heart: ',
+                'tie': ':shrug: Stalemate :shrug:',
+            }
 
-    def parse(self):
+    def generate_stats(self, nodeName, outcome):
         df = pd.DataFrame(self.stats, columns=['Player'] + self.column_data.keys()[:11])
         df['Total'] = df['Guild Master'] + df['Officer'] + df['Member'] + df['Siege Weapons']
         df['KDR'] = df['Total'].divide(df['Deaths'])
@@ -139,17 +138,27 @@ class BDOStats(object):
             "content": "@everyone",
             "embeds": [
                 {
-                    "title": "Node War Summary",
+                    "title": ":information_source: Node War Summary",
+                    "color": "0x0471f4",
                     "fields": [
                         {
                             "name": "Attendance Count",
-                            "value": len(self.stats)
-                        }
+                            "value": len(self.stats),
+                        },
+                        {
+                            "name": "Node Name",
+                            "value": nodeName,
+                        },
+                        {
+                            "name": "Outcome",
+                            "value": self.outcome_mapping['outcome'],
+                        },
                     ]
                 },
                 {
-                    "title": "Node War Stats",
-                    "fields": results['superlatives']
+                    "title": ":information_source: Node War Stats",
+                    "fields": results['superlatives'],
+                    "color": "0xca0000",
                 }
             ]
         }

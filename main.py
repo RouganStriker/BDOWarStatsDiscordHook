@@ -13,4 +13,7 @@ if not os.path.exists(args.csv):
 
 webhook = args.webhook or os.environ.get('DISCORD_STATS_WEBHOOK')
 
-BDOStats(args.csv, webhook).parse()
+nodeName = input("Enter the Node Name:")
+outcome = input("Enter the outcome (win,loss,tie):")
+
+BDOStats(args.csv, webhook).generate_stats(nodeName, outcome)
