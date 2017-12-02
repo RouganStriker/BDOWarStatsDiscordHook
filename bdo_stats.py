@@ -228,13 +228,13 @@ class BDOStats(object):
 
             results['achievements'].append({
                 "name": "{title} ({got}/{total})".format(title=achievement['title'],
-                                                         got=len(players),
+                                                         got=len(players.split(',')),
                                                          total=len(self.stats)),
                 "value": "*{description}*\n{players}".format(description=achievement['description'],
                                                            players=players),
             })
 
-        display_date = datetime.strptime(date, "%d/%m/%Y").strftime("%A, %d. %B %Y")
+        display_date = datetime.strptime(date, "%d/%m/%Y").strftime("%A, %B %d, %Y")
         data = {
             "content": "@everyone",
             "embeds": [
