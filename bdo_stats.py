@@ -151,7 +151,7 @@ class BDOStats(object):
                         },
                         {
                             "name": "Outcome",
-                            "value": self.outcome_mapping['outcome'],
+                            "value": self.outcome_mapping[outcome],
                         },
                     ]
                 },
