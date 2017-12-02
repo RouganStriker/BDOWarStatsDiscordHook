@@ -1,3 +1,4 @@
+from collections import OrderedDict
 import csv
 import numpy as np
 import pandas as pd
@@ -5,80 +6,80 @@ import pandas as pd
 
 class BDOStats(object):
     def __init__(self, csv_file):
-        with open(csv_file.csv) as f:
+        with open(csv_file) as f:
             rows = csv.reader(f)
             header = rows.next()
             if len(header) < 11:
                 raise Exception("Expected at least 12 columns, got {0}".format(len(header)))
 
             self.stats = [[row[0]] + map(int, row[1:12]) for row in rows]
-            self.column_data = {
-                'Fortress': {
+            self.column_data = OrderedDict([
+                ('Fortress', {
                     'stats': [('max', 'Most')],
                     'verb': ' Destroyed',
                     'emoji': ':european_castle:',
-                },
-                'Command Post': {
+                }),
+                ('Command Post', {
                     'stats': [('max', 'Most')],
                     'verb': ' Destroyed',
                     'emoji': ':japanese_castle:',
-                },
-                'Gate': {
+                }),
+                ('Gate', {
                     'stats': [('max', 'Most')],
                     'verb': ' Destroyed',
                     'emoji': ':shinto_shrine:',
-                },
-                'Help': {
+                }),
+                ('Help', {
                     'stats': [('max', 'Most'), ('min', 'Least')],
                     'verb': '',
                     'emoji': ':handshake:',
-                },
-                'Mount': {
+                }),
+                ('Mount', {
                     'stats': [('max', 'Most'), ('min', 'Least')],
                     'verb': ' Kills',
                     'emoji': ':horse:',
-                },
-                'Placed Object': {
+                }),
+                ('Placed Object', {
                     'stats': [('max', 'Most')],
                     'verb': ' Destroyed',
                     'emoji': ':hammer:',
-                },
-                'Guild Master': {
+                }),
+                ('Guild Master', {
                     'stats': [('max', 'Most'), ('min', 'Least')],
                     'verb': ' Kills',
                     'emoji': ':prince:',
-                },
-                'Officer': {
+                }),
+                ('Officer', {
                     'stats': [('max', 'Most'), ('min', 'Least')],
                     'verb': ' Kills',
                     'emoji': ':cop:',
-                },
-                'Member': {
+                }),
+                ('Member', {
                     'stats': [('max', 'Most'), ('min', 'Least')],
                     'verb': ' Kills',
                     'emoji': ':man_with_gua_pi_mao:',
-                },
-                'Deaths': {
+                }),
+                ('Deaths', {
                     'stats': [('max', 'Most'), ('min', 'Least')],
                     'verb': '',
                     'emoji': ':skull_crossbones:',
-                },
-                'Siege Weapons': {
+                }),
+                ('Siege Weapons', {
                     'stats': [('max', 'Most'), ('min', 'Least')],
                     'verb': ' Kills',
                     'emoji': ':bomb:',
-                },
-                'Total': {
+                }),
+                ('Total', {
                     'stats': [('max', 'Most'), ('min', 'Least'), ('mean', 'Average')],
                     'verb': ' Kills',
                     'emoji': ':knife:',
-                },
-                'KDR': {
-                    'stats': [('Highest', 'Most'), ('Lowest', 'Least'), ('mean', 'Average')],
+                }),
+                ('KDR', {
+                    'stats': [('max', 'Most'), ('min', 'Least'), ('mean', 'Average')],
                     'verb': ' Kills',
                     'emoji': ':crossed_swords:',
-                },
-            }
+                }),
+            ])
 
     def get_summary(self, node_name, result):
         return {
@@ -88,7 +89,7 @@ class BDOStats(object):
         }
 
     def parse(self):
-        df = pd.DataFrame(self.stats, columns=['Player'] + self.column_data.keys())
+        df = pd.DataFrame(self.stats, columns=['Player'] + self.column_data.keys()[:11])
         df['Total'] = df['Guild Master'] + df['Officer'] + df['Member'] + df['Siege Weapons']
         df['KDR'] = df['Total'].divide(df['Deaths'])
         df['KDR'].replace([np.inf, -np.inf], np.nan, inplace=True)
@@ -123,6 +124,7 @@ class BDOStats(object):
                         '{emoji} Average {col}{verb}: {value}{players}'.format(emoji=data['emoji'],
                                                                                col=col,
                                                                                verb=data['verb'],
+                                                                               value=value,
                                                                                players=players)
                     )
                 else:
@@ -134,7 +136,7 @@ class BDOStats(object):
                     )
 
             results['superlatives'][col] = {
-                'name': '{emoji} {col} {verb}'.format(emoji=data['emoji'],
+                'name': '{emoji} {col}{verb}'.format(emoji=data['emoji'],
                                                       col=col,
                                                       verb=data['verb']),
                 'value': '\n'.join(field_values),

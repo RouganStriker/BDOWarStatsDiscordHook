@@ -1,8 +1,7 @@
 import argparse
-import csv
 import os
 
-from .bdo_stats import BDOStats
+from bdo_stats import BDOStats
 
 parser = argparse.ArgumentParser()
 parser.add_argument("csv", help="CSV file")
