@@ -1,5 +1,6 @@
 from collections import OrderedDict
 import csv
+from datetime import datetime
 import numpy as np
 import pandas as pd
 import requests
@@ -98,7 +99,7 @@ class BDOStats(object):
                 {
                     'title': 'Big Game Hunter',
                     'description': 'Kill 20 Guild Masters',
-                    'formula': lambda df: df['Guild Masters'] >= 20,
+                    'formula': lambda df: df['Guild Master'] >= 20,
                 },
                 {
                     'title': 'I Didn\t Choose The Support Life',
@@ -121,7 +122,7 @@ class BDOStats(object):
                     'formula': lambda df: df['Siege Weapons'] >= 20,
                 },
                 {
-                    'title': 'Super Soaker :sweat_drops:',
+                    'title': 'Wet Sponge :sweat_drops:',
                     'description': 'Get 20+ Deaths without a Kill',
                     'formula': lambda df: (df['Deaths'] >= 20) & (df['Total'] == 0),
                 },
@@ -170,7 +171,7 @@ class BDOStats(object):
         # Return a string of all players that satisfy the condition
         return ", ".join(df.iloc[np.where(condition)[0]].index.tolist())
 
-    def generate_stats(self, nodeName, outcome):
+    def generate_stats(self, nodeName, outcome, date):
         df = pd.DataFrame(self.stats, columns=['Player'] + self.column_data.keys()[:11])
         df['Total'] = df['Guild Master'] + df['Officer'] + df['Member'] + df['Siege Weapons']
         df['KDR'] = df['Total'].divide(df['Deaths'])
@@ -231,6 +232,7 @@ class BDOStats(object):
                                                            players=players),
             })
 
+        display_date = datetime.strptime(date, "%d/%m/%Y").strftime("%A, %d. %B %Y")
         data = {
             "content": "@everyone",
             "embeds": [
@@ -238,6 +240,10 @@ class BDOStats(object):
                     "title": ":information_source: Node War Summary",
                     "color": "6591981",
                     "fields": [
+                        {
+                            "name": "Date",
+                            "value": display_date
+                        },
                         {
                             "name": "Attendance Count",
                             "value": len(self.stats),
