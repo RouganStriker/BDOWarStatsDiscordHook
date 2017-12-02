@@ -95,7 +95,7 @@ class BDOStats(object):
         df['Total'] = df['Guild Master'] + df['Officer'] + df['Member'] + df['Siege Weapons']
         df['KDR'] = df['Total'].divide(df['Deaths'])
         df['KDR'].replace([np.inf, -np.inf], np.nan, inplace=True)
-        df['KDR'] = df['KDR'].apply(lambda x: pd.Series.round(x, 2))
+        df.round(2)
         df.set_index('Player', inplace=True)
 
         results = {
@@ -107,9 +107,9 @@ class BDOStats(object):
 
             for stat, adjective in data['stats']:
                 if stat == 'max':
-                    value = round(df[col].max(), 2)
+                    value = df[col].max()
                 elif stat == 'min':
-                    value = round(df[col].min(), 2)
+                    value = df[col].min()
                 elif stat == 'mean':
                     value = round(df[col].mean(), 2)
                 else:
