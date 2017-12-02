@@ -169,7 +169,7 @@ class BDOStats(object):
 
     def _find_players(self, df, condition):
         # Return a string of all players that satisfy the condition
-        return ", ".join(df.iloc[np.where(condition)[0]].index.tolist())
+        return ", ".join(sort(df.iloc[np.where(condition)[0]].index.tolist()))
 
     def generate_stats(self, nodeName, outcome, date):
         df = pd.DataFrame(self.stats, columns=['Player'] + self.column_data.keys()[:11])
@@ -227,7 +227,7 @@ class BDOStats(object):
                 continue
 
             results['achievements'].append({
-                "field": achievement['title'],
+                "name": achievement['title'],
                 "value": "{description}\n{players}".format(description=achievement['description'],
                                                            players=players),
             })
@@ -270,8 +270,6 @@ class BDOStats(object):
                 }
             ]
         }
-
-        print(data)
 
         if self.webhook:
             r = requests.post(self.webhook, json=data)
