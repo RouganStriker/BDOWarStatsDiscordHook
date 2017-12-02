@@ -139,7 +139,7 @@ class BDOStats(object):
             "embeds": [
                 {
                     "title": ":information_source: Node War Summary",
-                    "color": "0x0471f4",
+                    "color": "1127128",
                     "fields": [
                         {
                             "name": "Attendance Count",
@@ -158,14 +158,15 @@ class BDOStats(object):
                 {
                     "title": ":information_source: Node War Stats",
                     "fields": results['superlatives'],
-                    "color": "0xca0000",
+                    "color": "14177041",
                 }
             ]
         }
+
+        print(data)
 
         if self.webhook:
             r = requests.post(self.webhook, json=data)
             print(r.content)
         else:
             print("No Webhook, results:")
-            print(results)
