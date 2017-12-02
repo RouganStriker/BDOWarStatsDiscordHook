@@ -112,7 +112,7 @@ class BDOStats(object):
                     'formula': lambda df: (df['Total'] >= 50) & (df['Deaths'] >= 50),
                 },
                 {
-                    'title': 'Where Are You Fighting?',
+                    'title': 'Who Are You Fighting?',
                     'description': 'Get more Mount kills that Player kills',
                     'formula': lambda df: df['Mount'] > df['Total'],
                 },
@@ -202,7 +202,7 @@ class BDOStats(object):
                     players = ''
                 else:
                     # List the player names
-                    players = " ({})".format(self._find_players(df, [df[col] == value]))
+                    players = " ({})".format(self._find_players(df, df[col] == value))
 
                 field_values.append(
                     '{adjective}{verb}: {value}{players}'.format(adjective=adjective,
@@ -227,8 +227,10 @@ class BDOStats(object):
                 continue
 
             results['achievements'].append({
-                "name": achievement['title'],
-                "value": "{description}\n{players}".format(description=achievement['description'],
+                "name": "{title} ({got}/{total})".format(title=achievement['title'],
+                                                         got=len(players),
+                                                         total=len(self.stats)),
+                "value": "*{description}*\n{players}".format(description=achievement['description'],
                                                            players=players),
             })
 
