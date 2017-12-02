@@ -89,6 +89,84 @@ class BDOStats(object):
                 'tie': ':shrug: Stalemate :shrug:',
             }
 
+            self.achievements = [
+                {
+                    'title': 'Look Ma I Helped!',
+                    'description': 'Get a help, kill and death',
+                    'formula': lambda df: [df['Help'] > 1, df['Total'] > 1, df['Deaths'] > 1],
+                },
+                {
+                    'title': 'Big Game Hunter',
+                    'description': 'Kill 20 Guild Masters',
+                    'formula': lambda df: [df['Guild Masters'] >= 20],
+                },
+                {
+                    'title': 'I Didn\t Choose The Support Life',
+                    'description': 'Get 20 Help',
+                    'formula': lambda df: [df['Guild Masters'] >= 20],
+                },
+                {
+                    'title': 'Glass Cannon',
+                    'description': 'Get 50 kills, 50 deaths',
+                    'formula': lambda df: [df['Total'] >= 50, df['Deaths'] >= 50],
+                },
+                {
+                    'title': 'Where Are You Fighting?',
+                    'description': 'Get more Mount kills that Player kills',
+                    'formula': lambda df: [df['Mount'] > df['Total']],
+                },
+                {
+                    'title': 'I Like Big Guns',
+                    'description': 'Get 20 Siege Weapon kills',
+                    'formula': lambda df: [df['Siege Weapons'] >= 20],
+                },
+                {
+                    'title': 'Super Soaker :sweat_drops:',
+                    'description': 'Get 20+ Deaths without a Kill',
+                    'formula': lambda df: [df['Deaths'] >= 20, df['Total'] == 0],
+                },
+                {
+                    'title': 'Wrecking Ball',
+                    'description': 'Destroy a Fort and 5 Placed Objects',
+                    'formula': lambda df: [df['Fortress'] >= 1 | df['Command Post'] >= 1, df['Placed Object'] >= 5],
+                },
+                {
+                    'title': 'Gate Crasher',
+                    'description': 'Destroy a Gate',
+                    'formula': lambda df: [df['Gate'] >= 1],
+                },
+                {
+                    'title': 'Boogeyman :ghost:',
+                    'description': 'Destroy a Fort and Placed Object, Kill a Mount, Guild Master, Officer, Member, and Kill with Siege Weapons',
+                    'formula': lambda df: [df['Fortress'] >= 1 | df['Command Post'] >= 1,
+                                           df['Placed Object'] >= 1,
+                                           df['Mount'] >= 1,
+                                           df['Guild Master'] >= 1,
+                                           df['Officer'] >= 1,
+                                           df['Member'] >= 1,
+                                           df['Siege Weapons'] >= 1],
+                },
+                {
+                    'title': 'Double Double',
+                    'description': 'Get 10 Help, 10 Kills',
+                    'formula': lambda df: [df['Help'] >= 10, df['Total'] >= 10],
+                },
+                {
+                    'title': ':fire: Super Hot :fire:',
+                    'description': 'Get 100 Kills',
+                    'formula': lambda df: [df['Total'] >= 100],
+                },
+                {
+                    'title': 'I\m Having A Bad Day',
+                    'description': 'Get 100 Deaths',
+                    'formula': lambda df: [df['Deaths'] >= 100],
+                },
+            ]
+
+    def _find_players(self, df, condition):
+        # Return a string of all players that satisfy the condition
+        return ", ".join(df.iloc[np.where(condition)[0]].index.tolist())
+
     def generate_stats(self, nodeName, outcome):
         df = pd.DataFrame(self.stats, columns=['Player'] + self.column_data.keys()[:11])
         df['Total'] = df['Guild Master'] + df['Officer'] + df['Member'] + df['Siege Weapons']
@@ -98,9 +176,11 @@ class BDOStats(object):
         df.set_index('Player', inplace=True)
 
         results = {
-            'superlatives': []
+            'stats': [],
+            'achievements': []
         }
 
+        # Get min, max and average for stats
         for col, data in self.column_data.items():
             field_values = []
 
@@ -118,7 +198,7 @@ class BDOStats(object):
                     players = ''
                 else:
                     # List the player names
-                    players = " ({})".format(", ".join(df.iloc[np.where(df[col] == value)[0]].index.tolist()))
+                    players = " ({})".format(self._find_players(df, [df[col] == value]))
 
                 field_values.append(
                     '{adjective}{verb}: {value}{players}'.format(adjective=adjective,
@@ -127,11 +207,25 @@ class BDOStats(object):
                                                                  players=players)
                 )
 
-            results['superlatives'].append({
-                'name': '{emoji} {col}{verb}'.format(emoji=data['emoji'],
+            results['stats'].append({
+                'name': '{emoji} {col}'.format(emoji=data['emoji'],
                                                      col=col,
                                                      verb=data['verb']),
                 'value': '\n'.join(field_values),
+            })
+
+        # Get achievements
+        for achievement in self.achievements:
+            # See if any player got it
+            players = self._find_players(df, achievement['formula'])
+
+            if not players:
+                continue
+
+            results['achievements'].append({
+                "field": achievement['title'],
+                "value": "{description}\n{players}".format(description=achievement['description'],
+                                                           players=players),
             })
 
         data = {
@@ -139,7 +233,7 @@ class BDOStats(object):
             "embeds": [
                 {
                     "title": ":information_source: Node War Summary",
-                    "color": "1127128",
+                    "color": "6591981",
                     "fields": [
                         {
                             "name": "Attendance Count",
@@ -156,9 +250,14 @@ class BDOStats(object):
                     ]
                 },
                 {
-                    "title": ":information_source: Node War Stats",
-                    "fields": results['superlatives'],
-                    "color": "14177041",
+                    "title": ":bar_chart: Stats",
+                    "fields": results['stats'],
+                    "color": "3978097",
+                },
+                {
+                    "title": ":military_medal: Achievements",
+                    "fields": results['achievements'],
+                    "color": "9662683",
                 }
             ]
         }
