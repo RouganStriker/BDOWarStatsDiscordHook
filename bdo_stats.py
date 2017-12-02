@@ -93,73 +93,76 @@ class BDOStats(object):
                 {
                     'title': 'Look Ma I Helped!',
                     'description': 'Get a help, kill and death',
-                    'formula': lambda df: [df['Help'] > 1, df['Total'] > 1, df['Deaths'] > 1],
+                    'formula': lambda df: (df['Help'] > 1) & (df['Total'] > 1) & (df['Deaths'] > 1),
                 },
                 {
                     'title': 'Big Game Hunter',
                     'description': 'Kill 20 Guild Masters',
-                    'formula': lambda df: [df['Guild Masters'] >= 20],
+                    'formula': lambda df: df['Guild Masters'] >= 20,
                 },
                 {
                     'title': 'I Didn\t Choose The Support Life',
                     'description': 'Get 20 Help',
-                    'formula': lambda df: [df['Guild Masters'] >= 20],
+                    'formula': lambda df: df['Help'] >= 20,
                 },
                 {
                     'title': 'Glass Cannon',
                     'description': 'Get 50 kills, 50 deaths',
-                    'formula': lambda df: [df['Total'] >= 50, df['Deaths'] >= 50],
+                    'formula': lambda df: (df['Total'] >= 50) & (df['Deaths'] >= 50),
                 },
                 {
                     'title': 'Where Are You Fighting?',
                     'description': 'Get more Mount kills that Player kills',
-                    'formula': lambda df: [df['Mount'] > df['Total']],
+                    'formula': lambda df: df['Mount'] > df['Total'],
                 },
                 {
                     'title': 'I Like Big Guns',
                     'description': 'Get 20 Siege Weapon kills',
-                    'formula': lambda df: [df['Siege Weapons'] >= 20],
+                    'formula': lambda df: df['Siege Weapons'] >= 20,
                 },
                 {
                     'title': 'Super Soaker :sweat_drops:',
                     'description': 'Get 20+ Deaths without a Kill',
-                    'formula': lambda df: [df['Deaths'] >= 20, df['Total'] == 0],
+                    'formula': lambda df: (df['Deaths'] >= 20) & (df['Total'] == 0),
                 },
                 {
                     'title': 'Wrecking Ball',
                     'description': 'Destroy a Fort and 5 Placed Objects',
-                    'formula': lambda df: [df['Fortress'] >= 1 | df['Command Post'] >= 1, df['Placed Object'] >= 5],
+                    'formula': lambda df: (df['Fortress'] >= 1) &
+                                          (df['Command Post'] >= 1) &
+                                          (df['Placed Object'] >= 5),
                 },
                 {
                     'title': 'Gate Crasher',
                     'description': 'Destroy a Gate',
-                    'formula': lambda df: [df['Gate'] >= 1],
+                    'formula': lambda df: df['Gate'] >= 1,
                 },
                 {
                     'title': 'Boogeyman :ghost:',
                     'description': 'Destroy a Fort and Placed Object, Kill a Mount, Guild Master, Officer, Member, and Kill with Siege Weapons',
-                    'formula': lambda df: [df['Fortress'] >= 1 | df['Command Post'] >= 1,
-                                           df['Placed Object'] >= 1,
-                                           df['Mount'] >= 1,
-                                           df['Guild Master'] >= 1,
-                                           df['Officer'] >= 1,
-                                           df['Member'] >= 1,
-                                           df['Siege Weapons'] >= 1],
+                    'formula': lambda df: (df['Fortress'] >= 1) &
+                                          (df['Command Post'] >= 1) &
+                                          (df['Placed Object'] >= 1) &
+                                          (df['Mount'] >= 1) &
+                                          (df['Guild Master'] >= 1) &
+                                          (df['Officer'] >= 1) &
+                                          (df['Member'] >= 1) &
+                                          (df['Siege Weapons'] >= 1)
                 },
                 {
                     'title': 'Double Double',
                     'description': 'Get 10 Help, 10 Kills',
-                    'formula': lambda df: [df['Help'] >= 10, df['Total'] >= 10],
+                    'formula': lambda df: (df['Help'] >= 10) & (df['Total'] >= 10),
                 },
                 {
                     'title': ':fire: Super Hot :fire:',
                     'description': 'Get 100 Kills',
-                    'formula': lambda df: [df['Total'] >= 100],
+                    'formula': lambda df: df['Total'] >= 100,
                 },
                 {
                     'title': 'I\m Having A Bad Day',
                     'description': 'Get 100 Deaths',
-                    'formula': lambda df: [df['Deaths'] >= 100],
+                    'formula': lambda df: df['Deaths'] >= 100,
                 },
             ]
 
@@ -209,15 +212,15 @@ class BDOStats(object):
 
             results['stats'].append({
                 'name': '{emoji} {col}'.format(emoji=data['emoji'],
-                                                     col=col,
-                                                     verb=data['verb']),
+                                               col=col,
+                                               verb=data['verb']),
                 'value': '\n'.join(field_values),
             })
 
         # Get achievements
         for achievement in self.achievements:
             # See if any player got it
-            players = self._find_players(df, achievement['formula'])
+            players = self._find_players(df, achievement['formula'](df))
 
             if not players:
                 continue
