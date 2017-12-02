@@ -155,7 +155,7 @@ class BDOStats(object):
         }
 
         if self.webhook:
-            r = requests.post(self.webhook, data=data)
+            r = requests.post(self.webhook, json=data)
             print(r.content)
         else:
             print("No Webhook, results:")
