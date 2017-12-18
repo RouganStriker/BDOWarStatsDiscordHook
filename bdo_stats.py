@@ -33,12 +33,12 @@ class BDOStats(object):
                     'emoji': ':shinto_shrine:',
                 }),
                 ('Help', {
-                    'stats': [('max', 'Most'), ('min', 'Least')],
+                    'stats': [('max', 'Most'), ('min', 'Least'), ('sum', 'Guild Total')],
                     'verb': '',
                     'emoji': ':handshake:',
                 }),
                 ('Mount', {
-                    'stats': [('max', 'Most'), ('min', 'Least')],
+                    'stats': [('max', 'Most'), ('min', 'Least'), ('sum', 'Guild Total')],
                     'verb': ' Kills',
                     'emoji': ':horse:',
                 }),
@@ -63,7 +63,7 @@ class BDOStats(object):
                     'emoji': ':man_with_gua_pi_mao:',
                 }),
                 ('Deaths', {
-                    'stats': [('max', 'Most'), ('min', 'Least'), ('mean', 'Average')],
+                    'stats': [('max', 'Most'), ('min', 'Least'), ('mean', 'Average'), ('sum', 'Guild Total')],
                     'verb': '',
                     'emoji': ':skull_crossbones:',
                 }),
@@ -72,8 +72,8 @@ class BDOStats(object):
                     'verb': ' Kills',
                     'emoji': ':bomb:',
                 }),
-                ('Total', {
-                    'stats': [('max', 'Most'), ('min', 'Least'), ('mean', 'Average')],
+                ('All Kills', {
+                    'stats': [('max', 'Most'), ('min', 'Least'), ('mean', 'Average'), ('sum', 'Guild Total')],
                     'verb': ' Kills',
                     'emoji': ':knife:',
                 }),
@@ -94,7 +94,7 @@ class BDOStats(object):
                 {
                     'title': 'Look Ma I Helped!',
                     'description': 'Get a help, kill and death',
-                    'formula': lambda df: (df['Help'] > 1) & (df['Total'] > 1) & (df['Deaths'] > 1),
+                    'formula': lambda df: (df['Help'] > 0) & (df['Total'] > 0) & (df['Deaths'] > 0),
                 },
                 {
                     'title': 'Big Game Hunter',
@@ -113,7 +113,7 @@ class BDOStats(object):
                 },
                 {
                     'title': 'Who Are You Fighting?',
-                    'description': 'Get more Mount kills that Player kills',
+                    'description': 'Get more Mount kills than Player kills',
                     'formula': lambda df: df['Mount'] > df['Total'],
                 },
                 {
@@ -195,18 +195,21 @@ class BDOStats(object):
                     value = df[col].min()
                 elif stat == 'mean':
                     value = round(df[col].mean(), 2)
+                elif stat == 'sum':
+                    value = df[col].sum()
                 else:
                     raise Exception("Unknown stat {0}".format(stat))
 
-                if value == 0 or stat == 'mean':
+                if value == 0 or stat in ['mean', 'sum']:
                     players = ''
                 else:
                     # List the player names
                     players = " ({})".format(self._find_players(df, df[col] == value))
 
+                verb = data['verb'] if stat != 'sum' else ''
                 field_values.append(
                     '{adjective}{verb}: {value}{players}'.format(adjective=adjective,
-                                                                 verb=data['verb'],
+                                                                 verb=verb,
                                                                  value=value,
                                                                  players=players)
                 )
@@ -278,3 +281,10 @@ class BDOStats(object):
             print(r.content)
         else:
             print("No Webhook, results:")
+
+    def generate_influx_query(self):
+        df = pd.DataFrame(self.stats, columns=['Player'] + self.column_data.keys()[:11])
+        df['date'] = pd.Timestamp('2017-12-03')
+        from influxdb import DataFrameClient
+
+        client = DataFrameClient(database='bdostats')
