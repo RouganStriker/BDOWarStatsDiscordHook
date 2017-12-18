@@ -94,7 +94,7 @@ class BDOStats(object):
                 {
                     'title': 'Look Ma I Helped!',
                     'description': 'Get a help, kill and death',
-                    'formula': lambda df: (df['Help'] > 0) & (df['Total'] > 0) & (df['Deaths'] > 0),
+                    'formula': lambda df: (df['Help'] > 0) & (df['All Kills'] > 0) & (df['Deaths'] > 0),
                 },
                 {
                     'title': 'Big Game Hunter',
@@ -109,12 +109,12 @@ class BDOStats(object):
                 {
                     'title': 'Glass Cannon',
                     'description': 'Get 50 kills, 50 deaths',
-                    'formula': lambda df: (df['Total'] >= 50) & (df['Deaths'] >= 50),
+                    'formula': lambda df: (df['All Kills'] >= 50) & (df['Deaths'] >= 50),
                 },
                 {
                     'title': 'Who Are You Fighting?',
                     'description': 'Get more Mount kills than Player kills',
-                    'formula': lambda df: df['Mount'] > df['Total'],
+                    'formula': lambda df: df['Mount'] > df['All Kills'],
                 },
                 {
                     'title': 'I Like Big Guns',
@@ -124,7 +124,7 @@ class BDOStats(object):
                 {
                     'title': 'Wet Sponge :sweat_drops:',
                     'description': 'Get 20+ Deaths without a Kill',
-                    'formula': lambda df: (df['Deaths'] >= 20) & (df['Total'] == 0),
+                    'formula': lambda df: (df['Deaths'] >= 20) & (df['All Kills'] == 0),
                 },
                 {
                     'title': 'Wrecking Ball',
@@ -153,12 +153,12 @@ class BDOStats(object):
                 {
                     'title': 'Double Double',
                     'description': 'Get 10 Help, 10 Kills',
-                    'formula': lambda df: (df['Help'] >= 10) & (df['Total'] >= 10),
+                    'formula': lambda df: (df['Help'] >= 10) & (df['All Kills'] >= 10),
                 },
                 {
                     'title': ':fire: Super Hot :fire:',
                     'description': 'Get 100 Kills',
-                    'formula': lambda df: df['Total'] >= 100,
+                    'formula': lambda df: df['All Kills'] >= 100,
                 },
                 {
                     'title': 'I\m Having A Bad Day',
@@ -173,8 +173,8 @@ class BDOStats(object):
 
     def generate_stats(self, nodeName, outcome, date):
         df = pd.DataFrame(self.stats, columns=['Player'] + self.column_data.keys()[:11])
-        df['Total'] = df['Guild Master'] + df['Officer'] + df['Member'] + df['Siege Weapons']
-        df['KDR'] = df['Total'].divide(df['Deaths'])
+        df['All Kills'] = df['Guild Master'] + df['Officer'] + df['Member'] + df['Siege Weapons']
+        df['KDR'] = df['All Kills'].divide(df['Deaths'])
         df['KDR'].replace([np.inf, -np.inf], np.nan, inplace=True)
         df.round(2)
         df.set_index('Player', inplace=True)
